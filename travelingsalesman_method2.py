@@ -31,6 +31,8 @@ from math import sqrt
 
 INT_MAX = 0
 final_res = 0
+final_path
+visited
 
 
 # Parameters: list of [x, y] pairs, indexed by city ID
@@ -44,7 +46,7 @@ def createEdgeList(coords):
     for i in range(n):
         for j in range(n):
             if i == j:
-                edgeList[i][j] = float('inf')
+                edgeList[i][j] = 0  #float('inf')    example code he sets the diagonal to 0 for this rendition of B&B
             else:
                 # dist = sqrt((x2 - x1)^2 + (y2 - y1)^2)
                 edgeList[i][j] = int(sqrt((coords[i][0] - coords[j][0])**2
@@ -52,7 +54,9 @@ def createEdgeList(coords):
     return edgeList
 
 #copy temp solution to final solution
-def copyToFinal(curr_path, final_path, N):
+def copyToFinal(curr_path, N):
+    global final_path
+
     for i in range(0, N):
         final_path[i] = curr_path[i]
     final_path[N] = curr_path[0]
@@ -83,8 +87,9 @@ def secondMin(edgeList, i, cityCount):
 
     return second
 
-def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, final_path, cityCount, visited):
+def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visited):
     global final_res
+    global final_path
     if (level == cityCount):
         if (edgeList[curr_path[level - 1]][curr_path[0]] != 0):
             curr_res = curr_weight + edgeList[curr_path[level - 1]][curr_path[0]]
@@ -124,8 +129,9 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, final_path, cit
                 visited[curr_path[k]] = True
 
 
-def TSP(edgeList, cityCount, visited, final_path):
+def TSP(edgeList, cityCount, visited):
     curr_path = [0] * (cityCount + 1)
+    global final_path
 
     curr_bound = 0
     for i in range (0, len(curr_path)):
@@ -166,6 +172,10 @@ def main():
                 arr[i] = list(map(int, arr[i])) # convert contents to int
                 coords.append(arr[i][1:3]) # add each [x, y] to coordinates
         #edgeList = createEdgeList(coords)
+
+        global visited
+        global final_path
+
 
         # get the number of cities
         cityCount = len(coords)
