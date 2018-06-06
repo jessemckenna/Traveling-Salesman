@@ -27,17 +27,39 @@ Output specifications:
 
 import sys
 
-def rowMin():
-	return
+def rowMin(cost[n][n], i):
+    rMin = cost[i][0]
+    for j in range(n-1):
+        if cost[i][j] < rMin:
+            rMin = cost[i][j]
+    return rMin
 
-def colMin():
-	return
+def colMin(cost[n][n], j):
+    cMin = cost[0][j]
+    for i in range(n-1):
+        if cost[i][j] < cMin:
+            cMin = cost[i][j]
+    return cMin
 
-def rowReduction():
-	return
+def rowReduction(cost[n][n]):
+    row = 0
+    for i in range(n-1):
+        rMin = rowMin(cost, i)
+        if rMin != float('inf'):
+            row = row + rMin
+        for j in range(n-1):
+            if cost[i][j] != float('inf'):
+                cost[i][j] = cost[i][j] - rMin
 
-def colReduction():
-	return
+def colReduction(cost[n][n]):
+    col = 0
+    for j in range(n-1):
+        cMin = colMin(cost, j)
+        if cMin != float('inf'):
+            col = col + cMin
+        for i in range(n-1):
+            if cost[i][j] != float('inf'):
+                cost[i][j] = cost[i][j] - cMin
 
 # Calculate the bounds
 def checkBounds():
