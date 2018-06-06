@@ -90,7 +90,7 @@ def secondMin(edgeList, i, cityCount):
     return second
 
 
-def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount):
+def TSPRec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount):
     global visited
 
     global final_res
@@ -101,7 +101,7 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount):
 
             if curr_res < final_res:
                 copyToFinal(curr_path)
-                final_res = list(curr_res)
+                final_res = curr_res
         return
 
     #for any other level iterate for all vetices to build the search space tree recursively
@@ -124,7 +124,7 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount):
 
                 #call helper function for next level
 
-                TSPREec(edgeList, curr_bound, curr_weight, level + 1, curr_path, cityCount)
+                TSPRec(edgeList, curr_bound, curr_weight, level + 1, curr_path, cityCount)
 
 
             #else we need too prune the nodes
@@ -156,7 +156,7 @@ def TSP(edgeList, cityCount):
     visited[0] = True
     curr_path[0] = 0
 
-    TSPRec(edgeList, curr_bound, 0, 1, curr_path, cityCount, visited)
+    TSPRec(edgeList, curr_bound, 0, 1, curr_path, cityCount)
 
 
 
