@@ -30,6 +30,7 @@ import datetime
 from math import sqrt
 
 def rowMin(cost, i):
+    n = len(cost)
     rMin = cost[i][0]
     for j in range(n):
         if cost[i][j] < rMin:
@@ -37,6 +38,7 @@ def rowMin(cost, i):
     return rMin
 
 def colMin(cost, j):
+    n = len(cost)
     cMin = cost[0][j]
     for i in range(n):
         if cost[i][j] < cMin:
@@ -44,6 +46,7 @@ def colMin(cost, j):
     return cMin
 
 def reduceRows(cost):
+    n = len(cost)
     row = 0
     for i in range(n):
         rMin = rowMin(cost, i)
@@ -52,8 +55,10 @@ def reduceRows(cost):
         for j in range(n):
             if cost[i][j] != float('inf'):
                 cost[i][j] = cost[i][j] - rMin
+    return row
 
 def reduceCols(cost):
+    n = len(cost)
     col = 0
     for j in range(n):
         cMin = colMin(cost, j)
@@ -62,11 +67,15 @@ def reduceCols(cost):
         for i in range(n):
             if cost[i][j] != float('inf'):
                 cost[i][j] = cost[i][j] - cMin
+    return col
 
 # Calculate the bounds
 # Parameters: start city, destination city, adjacency matrix of city distances,
 # list of edge costs so far
 def getBounds(start, dest, cost, edgeCost):
+    if start == dest:
+        return
+
     n = len(cost)
     reduced = [row[:] for row in cost] # create copy of cost to be reduced
 
@@ -82,42 +91,51 @@ def getBounds(start, dest, cost, edgeCost):
 
     # distance from start to dest + reduction cost + reduction cost so far
     edgeCost[dest] = cost[start][dest] + reductionCost + edgeCost[start]
+    print("edgeCost[" + str(dest) +"]: " + str(edgeCost[dest]))
 
 # Execute branch and bound algorithm; called "main" in the reference
 def branchAndBound(cost):
     n = len(cost)
     done = [False] * n # list to keep track of cities that have been processed
 
+    currentCity = 0 # start at first city in cost (arbitrary)
+    done[currentCity] = True
+    prevCity = 0
+
     initReductionCost = reduceRows(cost)
     initReductionCost += reduceCols(cost) # initial row + col reduction cost
-    edgeCost = [initReductionCost] * n # list of lower-bound cost per city
+    edgeCost = [0] * n # list of lower-bound cost per city
+    edgeCost[currentCity] = initReductionCost
+    print("initReductionCost:" + str(initReductionCost))
 
-    currentCity = 0 # start at first city in cost (arbitrary)
-    while not any(done): # while there are Falses in done, i.e. unchecked cities
+    while not all(done): # while there are Falses in done, i.e. unchecked cities
         # Calculate lower-bound cost from currentCity to all others
-        for i in range(n):
-            if done[i] == False:
-                getBounds(k, i, cost, edgeCost) # TODO: initialize k
+        for i in range(1, n):
+            if not done[i]:
+                getBounds(currentCity, i, cost, edgeCost)
 
         # Find city with lowest lower-bound cost
         min = float('inf')
-        for i in range(n):
+        for i in range(1, n):
             if done[i] == False:
                 if edgeCost[i] < min:
                     min = edgeCost[i]
                     currentCity = i
+        print("currentCity = " + str(currentCity))
         done[currentCity] = True
         
         for p in range(1, n):
-            cost[j][p] = float('inf')
+            cost[prevCity][p] = float('inf')
         for p in range(1, n):
             cost[p][currentCity] = float('inf')
-        cost[currentCity][j] = float('inf')
+        cost[currentCity][prevCity] = float('inf')
         
         reduceRows(cost)
         reduceCols(cost)
+        prevCity = currentCity
+        print("currentCity cost: " + str(edgeCost[currentCity]))
 
-    return # TODO: return something
+    return # TODO: return a list of cities visited in order and total tour length
 
 # Parameters: list of [x, y] pairs, indexed by city ID
 def createEdgeList(coords):    
@@ -125,7 +143,7 @@ def createEdgeList(coords):
     n = len(coords)
     edgeList = [None] * n
     for i in range(n):
-        edgeList[i] = [float('inf')] * n
+        edgeList[i] = [None] * n
 
     for i in range(n):
         for j in range(n):
@@ -157,7 +175,12 @@ def main():
                 arr[i] = arr[i].split() # split into [identifier, x, y]
                 arr[i] = list(map(int, arr[i])) # convert contents to int
                 coords.append(arr[i][1:3]) # add each [x, y] to coordinates
+        
         edgeList = createEdgeList(coords)
+        for i in range(len(edgeList)):
+            print(edgeList[i])
+
+        result = branchAndBound(edgeList)
 
         with open(outFile, "w") as f:
             f.write(output)
