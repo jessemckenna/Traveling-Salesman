@@ -26,6 +26,8 @@ Output specifications:
 '''
 
 import sys
+import datetime
+from math import sqrt
 
 def rowMin(cost, i):
     rMin = cost[i][0]
@@ -62,7 +64,7 @@ def reduceCols(cost):
                 cost[i][j] = cost[i][j] - cMin
 
 # Calculate the bounds
-# Arguments: start city, destination city, adjacency matrix of city distances,
+# Parameters: start city, destination city, adjacency matrix of city distances,
 # list of edge costs so far
 def getBounds(start, dest, cost, edgeCost):
     n = len(cost)
@@ -117,11 +119,30 @@ def branchAndBound(cost):
 
     return # TODO: return something
 
+# Parameters: list of [x, y] pairs, indexed by city ID
+def createEdgeList(coords):    
+    # Create empty 2D list of size (n * n)
+    n = len(coords)
+    edgeList = [None] * n
+    for i in range(n):
+        edgeList[i] = [float('inf')] * n
+
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                edgeList[i][j] = float('inf')
+            else:
+                # dist = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+                edgeList[i][j] = int(sqrt((coords[i][0] - coords[j][0])**2
+                                        + (coords[i][1] - coords[j][1])**2))
+    return edgeList
+
 # Read input, call branch and bound function, write output
 def main():
     if len(sys.argv) != 2:
         print("Usage: python travelingsalesman.py inputfilename")
     else:
+        print("Start: " + str(datetime.datetime.now().time()))
         inFile = sys.argv[1] # first argument
         outFile = inFile + ".tour" # ex. input.txt -> input.txt.tour
         output = ""
@@ -129,13 +150,16 @@ def main():
         with open(inFile) as f: # inFile is open in this block and auto-closed after
             read_data = f.read() # get entire file content as string
 
-        cities = {} # to hold cities, key: city identifier, value: [x, y]
-
+        coords = [] # list of x, y coordinates, indexed by city ID
         arr = read_data.split('\n') # split content into lines
         for i in range(len(arr)): # for each line
             if len(arr[i]) > 0:
                 arr[i] = arr[i].split() # split into [identifier, x, y]
-                cities[arr[i][0]] = arr[i][1:3] # add to dict
+                arr[i] = list(map(int, arr[i])) # convert contents to int
+                coords.append(arr[i][1:3]) # add each [x, y] to coordinates
+        edgeList = createEdgeList(coords)
 
         with open(outFile, "w") as f:
             f.write(output)
+        print("Finish: " + str(datetime.datetime.now().time()))
+main()
