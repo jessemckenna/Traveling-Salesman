@@ -62,12 +62,60 @@ def colReduction(cost[n][n]):
                 cost[i][j] = cost[i][j] - cMin
 
 # Calculate the bounds
-def checkBounds():
-	return
+# Arguments: start city, destination city, adjacency matrix of city distances,
+# list of edge costs so far
+def getBounds(start, dest, matrix, edgeCost):
+	n = len(matrix)
+	reduced = [row[:] for row in matrix] # create copy of matrix to be reduced
+
+	# Filter out irrelevant costs by setting to infinity
+	for j in range(n):
+		reduced[start][j] = float("inf") # set start row to infinity
+	for i in range(n):
+		reduced[i][dest] = float("inf") # set dest column to infinity
+	reduced[dest][start] = float("inf") # set [dest][start] to infinity
+
+	reductionCost = reduceRows(reduced)
+	reductionCost += reduceCols(reduced)
+
+	# distance from start to dest + reduction cost + reduction cost so far
+	edgeCost[dest] = matrix[start][dest] + reductionCost + edgeCost[start]
 
 # Execute branch and bound algorithm; called "main" in the reference
-def branchAndBound():
-	return
+def branchAndBound(matrix):
+	n = len(matrix)
+	done = [False] * n # list to keep track of cities that have been processed
+
+	initReductionCost = reduceRows(matrix)
+	initReductionCost += reduceCols(matrix) # initial row + col reduction cost
+	edgeCost = [initReductionCost] * n # list of lower-bound cost per city
+
+	currentCity = 0 # start at first city in matrix (arbitrary)
+	while not any(done): # while there are Falses in done, i.e. unchecked cities
+		# Calculate lower-bound cost from currentCity to all others
+		for i in range(n):
+			if done[i] == False:
+				getBounds(k, i, matrix, edgeCost) # TODO: initialize k
+
+		# Find city with lowest lower-bound cost
+		min = float("inf")
+		for i in range(n):
+			if done[i] == False:
+				if edgeCost[i] < min:
+					min = edgeCost[i]
+					currentCity = i
+		done[currentCity] = True
+		
+		for p in range(1, n):
+			matrix[j][p] = float("inf")
+		for p in range(1, n):
+			matrix[p][currentCity] = float("inf")
+		matrix[currentCity][j] = float("inf")
+		
+		reduceRows(matrix)
+		reduceCols(matrix)
+
+	return # TODO: return something
 
 # Read input, call branch and bound function, write output
 def main():
