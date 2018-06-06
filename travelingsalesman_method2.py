@@ -29,10 +29,13 @@ import sys
 import datetime
 from math import sqrt
 
+
 INF = float('inf')
 final_res = INF
 final_path = []
 visited = []
+INT_MAX = 0
+
 
 # Parameters: list of [x, y] pairs, indexed by city ID
 def createEdgeList(coords): 
@@ -86,7 +89,10 @@ def secondMin(edgeList, i, cityCount):
 
     return second
 
-def TSPRec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visited):
+
+def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount):
+    global visited
+
     global final_res
     global final_path
     if (level == cityCount):
@@ -95,7 +101,7 @@ def TSPRec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visit
 
             if curr_res < final_res:
                 copyToFinal(curr_path)
-                final_res = curr_res
+                final_res = list(curr_res)
         return
 
     #for any other level iterate for all vetices to build the search space tree recursively
@@ -117,7 +123,9 @@ def TSPRec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visit
                 visited[i] = True
 
                 #call helper function for next level
-                TSPRec(edgeList, curr_bound, curr_weight, level + 1, curr_path, cityCount, visited)
+
+                TSPREec(edgeList, curr_bound, curr_weight, level + 1, curr_path, cityCount)
+
 
             #else we need too prune the nodes
             curr_weight = curr_weight - edgeList[curr_path[level-1]][i]
@@ -129,9 +137,14 @@ def TSPRec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visit
 
 
 
-def TSP(edgeList, cityCount, visited):
+
+
+def TSP(edgeList, cityCount):
     curr_path = [-1] * (cityCount + 1)
     global final_path
+    global visited
+
+
     curr_bound = 0
     for i in range(0, len(visited)):
         visited[i] = False
@@ -189,7 +202,10 @@ def main():
         edgeList = createEdgeList(coords)
 
 
-        TSP(edgeList, cityCount, visited)
+        TSP(edgeList, cityCount)
+
+        TSP(edgeList, cityCount)
+
 
         print("Minimum cost : " + str(final_res))
         print("Path Taken : ");
