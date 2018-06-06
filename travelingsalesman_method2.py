@@ -71,7 +71,7 @@ def secondMin(edgeList, i, cityCount):
     global INT_MAX
     first = INT_MAX
     second = INT_MAX
-    for j in range (j, cityCount):
+    for j in range (cityCount):
         if i == j:
             continue
 
@@ -97,7 +97,7 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, final_path, cit
     #for any other level iterate for all vetices to build the search space tree recursively
     for i in range (0, cityCount):
         #consider next vertex if it is not same (diagonal entry in adj matrix and not visited already
-        if (edgeList[curr_path[level-1]][i] != 0 and visited[i] == false):
+        if (edgeList[curr_path[level-1]][i] != 0 and visited[i] == False):
             temp = curr_bound
             curr_weight += edgeList[curr_path[level -1]][i]
 
@@ -116,22 +116,22 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, final_path, cit
                 TSPREec(edgeList, curr_bound, curr_weight, level + 1, curr_path, final_path, cityCount, visited)
 
             #else we need too prune the nodes
-            curr_weight = curr_weight - edgeList[curr_poath[level-1]][i]
+            curr_weight = curr_weight - edgeList[curr_path[level-1]][i]
             curr_bound = temp
             for k in range(0, len(visited)):
-                visited = False
+                visited[k] = False
             for k in range(0, len(visited) -1):
                 visited[curr_path[k]] = True
 
 
 def TSP(edgeList, cityCount, visited, final_path):
-    curr_path[cityCount +1]
+    curr_path = [0] * (cityCount + 1)
 
     curr_bound = 0
     for i in range (0, len(curr_path)):
         curr_path[i] = -1
     for i in range(0, len(visited)):
-        visited = False
+        visited[i] = False
 
     #compute initial bound
     for i in range(0, cityCount):
@@ -170,12 +170,12 @@ def main():
         # get the number of cities
         cityCount = len(coords)
         #output final path list
-        final_path[cityCount +1]
+        final_path = [0] * (cityCount +1)
 
         #keep track of already visited nodes in a path
-        visited[cityCount]
+        visited = [0] * cityCount
         for i in range(0, len(visited)):
-            visited = False
+            visited[i] = False
 
         global INT_MAX
         #store final min weight of shortest tour
