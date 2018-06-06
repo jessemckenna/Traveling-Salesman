@@ -29,14 +29,13 @@ import sys
 import datetime
 from math import sqrt
 
-INT_MAX = 0
-final_res = 0
-final_path
-visited
-
+INF = float('inf')
+final_res = INF
+final_path = []
+visited = []
 
 # Parameters: list of [x, y] pairs, indexed by city ID
-def createEdgeList(coords):    
+def createEdgeList(coords): 
     # Create empty 2D list of size (n * n)
     n = len(coords)
     edgeList = [None] * n
@@ -54,17 +53,17 @@ def createEdgeList(coords):
     return edgeList
 
 #copy temp solution to final solution
-def copyToFinal(curr_path, N):
+def copyToFinal(curr_path):
     global final_path
-
+    N = len(curr_path)
     for i in range(0, N):
         final_path[i] = curr_path[i]
-    final_path[N] = curr_path[0]
+    final_path.append(curr_path[0])
 
 #function to find the min edge cost having the vertex i
 def firstMin(edgeList, i, cityCount):
-    global INT_MAX
-    min = INT_MAX
+    global INF
+    min = INF
     for k in range (0, cityCount):
         if edgeList[i][k] < min and i != k:
             min = edgeList[i][k]
@@ -72,9 +71,9 @@ def firstMin(edgeList, i, cityCount):
 
 #function to find the second min edge cost having an end at vertex i
 def secondMin(edgeList, i, cityCount):
-    global INT_MAX
-    first = INT_MAX
-    second = INT_MAX
+    global INF
+    first = INF
+    second = INF
     for j in range (cityCount):
         if i == j:
             continue
@@ -87,7 +86,7 @@ def secondMin(edgeList, i, cityCount):
 
     return second
 
-def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visited):
+def TSPRec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visited):
     global final_res
     global final_path
     if (level == cityCount):
@@ -118,7 +117,7 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visi
                 visited[i] = True
 
                 #call helper function for next level
-                TSPREec(edgeList, curr_bound, curr_weight, level + 1, curr_path, final_path, cityCount, visited)
+                TSPRec(edgeList, curr_bound, curr_weight, level + 1, curr_path, cityCount, visited)
 
             #else we need too prune the nodes
             curr_weight = curr_weight - edgeList[curr_path[level-1]][i]
@@ -129,13 +128,11 @@ def TSPREec(edgeList, curr_bound, curr_weight, level, curr_path, cityCount, visi
                 visited[curr_path[k]] = True
 
 
-def TSP(edgeList, cityCount, visited):
-    curr_path = [0] * (cityCount + 1)
-    global final_path
 
+def TSP(edgeList, cityCount, visited):
+    curr_path = [-1] * (cityCount + 1)
+    global final_path
     curr_bound = 0
-    for i in range (0, len(curr_path)):
-        curr_path[i] = -1
     for i in range(0, len(visited)):
         visited[i] = False
 
@@ -146,7 +143,7 @@ def TSP(edgeList, cityCount, visited):
     visited[0] = True
     curr_path[0] = 0
 
-    TSPREec(edgeList, curr_bound, 0, 1, curr_path, final_path, cityCount, visited)
+    TSPRec(edgeList, curr_bound, 0, 1, curr_path, cityCount, visited)
 
 
 
@@ -171,7 +168,6 @@ def main():
                 arr[i] = arr[i].split() # split into [identifier, x, y]
                 arr[i] = list(map(int, arr[i])) # convert contents to int
                 coords.append(arr[i][1:3]) # add each [x, y] to coordinates
-        #edgeList = createEdgeList(coords)
 
         global visited
         global final_path
@@ -180,22 +176,20 @@ def main():
         # get the number of cities
         cityCount = len(coords)
         #output final path list
-        final_path = [0] * (cityCount +1)
+        final_path = [None] * (cityCount +1)
 
         #keep track of already visited nodes in a path
-        visited = [0] * cityCount
-        for i in range(0, len(visited)):
-            visited[i] = False
+        visited = [False] * cityCount
 
-        global INT_MAX
+        global INF
         #store final min weight of shortest tour
-        minWeightShortestTour = INT_MAX
+        minWeightShortestTour = INF
 
         #create the edge list
         edgeList = createEdgeList(coords)
 
 
-        TSP(edgeList, cityCount, visited, final_path)
+        TSP(edgeList, cityCount, visited)
 
         print("Minimum cost : " + str(final_res))
         print("Path Taken : ");
@@ -207,7 +201,7 @@ def main():
         
         #with open(outFile, "w") as f:
       #      f.write(output)
-      #  print("Finish: " + str(datetime.datetime.now().time()))
+        print("Finish: " + str(datetime.datetime.now().time()))
         
 
 if __name__ == '__main__':
