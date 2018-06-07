@@ -8,7 +8,7 @@ from random import randint
 from math import sqrt
 from math import pow
 
-IMPROVE_LIMIT = 20
+MAX_TRIES = 20
 
 class Node:
     def __init__(self, coords):
@@ -55,11 +55,11 @@ def routeDistance(route, n):
 def opt2(route, n):
     existing_route = route
     best_distance = routeDistance(route, n)
-    improve = 0
+    tries = 0
 
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
-    while improveFound == True:
+    while tries < MAX_TRIES:
         improveFound = False
         #best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
@@ -67,7 +67,7 @@ def opt2(route, n):
                 new_route = opt2Swap(existing_route, i, k)
                 new_distance = routeDistance(new_route, n)
                 if new_distance < best_distance: # improvement found; reset
-                    improve = 0
+                    tries = 0
                     improveFound = True
                     existing_route = new_route
                     best_distance = new_distance
@@ -76,7 +76,7 @@ def opt2(route, n):
             if improveFound == True:
                 break
 
-        improve += 1
+        tries += 1
 
     return best_distance, existing_route
 
@@ -99,13 +99,13 @@ def main():
     if len(sys.argv) != 2:
         print("Usage: python travelingsalesman.py inputfilename")
     else:
-        print("Start: " + str(datetime.datetime.now().time()))
+        startTime = datetime.datetime.now()
+        print("Start: " + str(startTime))
         
         seed(None) # seed from current time
 
         inFile = sys.argv[1] # first argument
         outFile = inFile + ".tour" # ex. input.txt -> input.txt.tour
-        output = ""
 
         with open(inFile) as f: # inFile is open in this block and auto-closed after
             read_data = f.read() # get entire file content as string
@@ -128,12 +128,24 @@ def main():
         shuffle(vertices, count, len(vertices)) # randomize tour except start city
         tourLength, bestTour = opt2(vertices, len(vertices)) # call main driver program
 
-        bestTour.append(vertices[0]) # add start city to end to make tour
+        bestTour.append(vertices[0]) # add start city to end to complete tour
+        count += 1
+
+        finishTime = datetime.datetime.now()
+        elapsedTime = finishTime - startTime
+
+        print("Finish: " + str(finishTime))
+        print("Elapsed: " + str(elapsedTime))
 
         print("Length: " + str(tourLength))
         print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
-        print("Finish: " + str(datetime.datetime.now().time()))
 
+        with open(outFile, "w") as f:
+            f.write(str(tourLength) + "\n") # write tour length to first line
+            for i in range(count):
+                f.write(str(bestTour[i].ID) + " " 
+                        + str(bestTour[i].x) + " "
+                        + str(bestTour[i].y) + "\n")
 
 if __name__ == '__main__':
     main()
