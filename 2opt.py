@@ -1,6 +1,11 @@
+
+
+
+
 import sys
 import datetime
 from math import sqrt
+from random import shuffle
 
 class Node:
 
@@ -8,17 +13,22 @@ class Node:
         self.ID = coords[0]   #attribute to keep track of the ID
         self.x = coords[1]       #attribute to keep track of x coord
         self.y = coords[2]      #attribute to keep track of y coord
-        self.order = coords[3]     #attribute to keep track of the order
-
-    def addVertices(self, listInput):
-        for i in listInput:
-            self.order 
 
 
 
+#source: https://en.wikipedia.org/wiki/2-opt      
+def optSwap(route, i, k):
 
+    #"take route[0] to route[i-1] and add them in reverse order to new_route" 
+    new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
 
+    #"take route[i] to route[k] and add them in reverse order to new_route"
+    new_route.extend(reversed(route[i:k+1]))     #again, upper bounds are not inclusive in python
 
+    #"take route[k+1] to end and add them in order to new_route"
+    new_route.extend(route[k+1:])
+
+    return new_route
 
 
 
@@ -48,26 +58,16 @@ def main():
 
                 temp = [int(x) for x in (arr[i].strip().split(" "))] # split into identifier, x, y
          
-                tempOrder = count     #initialize the node order - 2-OPT is supposed to use a random order 
-                                     #so we can change this later we would basically have to implement a function
-                                     #that makes a distribution of the IDs (randomization without repetition)
-                                     #it's kind of annoying, but I've already done it once in C or C++, it's in my code
-                                     #folder somewhere... -mario
-                temp.append(tempOrder)
                 
                 n = Node(temp)  #the above could be combined into one line later, just wanted to be clear
                 vertices.append(n)
 
-                #arr[i] = list(map(int, arr[i])) # convert contents to int
-                #coords.append(arr[i][1:3]) # add each [x, y] to coordinates
 
 
+        #shuffle the nodes to randomize the path as per 2-opt procedure
+        shuffle(vertices)
 
-
-
-
-
-
+       
 
         #test call
         print("exiting")
