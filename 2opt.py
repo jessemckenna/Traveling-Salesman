@@ -32,7 +32,7 @@ def opt2Swap(route, i, k):
 
 def getDistance(node1, node2):
     #get the euclidean distance
-    d = sqrt(pow((node1.y - node1.x), 2) + pow((node2.y - node2.x), 2))
+    d = sqrt(pow((node2.y - node1.y), 2) + pow((node2.x - node1.x), 2))
 
     #round the number
     d = int(round(d))
@@ -44,6 +44,9 @@ def routeDistance(route, n):
     for i in range(1, n): # sum distances between nodes in the order given
         d += getDistance(route[i - 1], route[i])
     d += getDistance(route[-1], route[0]) # add distance back to start
+
+   
+
     return d
 
 
@@ -51,14 +54,15 @@ def routeDistance(route, n):
 # Parameters: route (an array of Node objects), n (count of objects in route)
 def opt2(route, n):
     existing_route = route
+    best_distance = routeDistance(route, n)
     improve = 0
 
-    improveFound = False      #extra bool variable since we do not have access to the "goto" label in python
+    improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
-    while improve < IMPROVE_LIMIT:
+    while improveFound == True:
         improveFound = False
-        best_distance = routeDistance(existing_route, n)
-        for i in range(1, n - 1):
+        #best_distance = routeDistance(existing_route, n)
+        for i in range(n - 1):
             for k in range(i + 1, n):
                 new_route = opt2Swap(existing_route, i, k)
                 new_distance = routeDistance(new_route, n)
@@ -71,7 +75,6 @@ def opt2(route, n):
                 
             if improveFound == True:
                 break
-
 
         improve += 1
 
@@ -122,8 +125,8 @@ def main():
                 vertices.append(newNode) # add each city (Node) to vertices
                 count += 1
 
-        shuffle(vertices, count, 1) # randomize tour except start city
-        tourLength, bestTour = opt2(vertices, count) # call main driver program
+        shuffle(vertices, count, len(vertices)) # randomize tour except start city
+        tourLength, bestTour = opt2(vertices, len(vertices)) # call main driver program
 
         bestTour.append(vertices[0]) # add start city to end to make tour
 
