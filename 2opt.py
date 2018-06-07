@@ -4,16 +4,17 @@
 
 import sys
 import datetime
+from random import seed
+from random import randint
 from math import sqrt
 from math import pow
-from random import shuffle
 
 class Node:
 
     def __init__(self, coords):
-        self.ID = coords[0]   #attribute to keep track of the ID
-        self.x = coords[1]       #attribute to keep track of x coord
-        self.y = coords[2]      #attribute to keep track of y coord
+        self.ID = coords[0] #attribute to keep track of the ID
+        self.x = coords[1]  #attribute to keep track of x coord
+        self.y = coords[2]  #attribute to keep track of y coord
 
 
 
@@ -41,12 +42,26 @@ def getDistance(node1, node2):
     return d
     
 
-
 def opt2():
-    print("Magic happens here")
+    improved = False
+    swappableNodes = 0
+    while !improved:
+       start_again:
+       best_distance = calculateTotalDistance(existing_route)
+       for i in range(1, swappableNodes - 1):
+           for k in range(i + 1, swappableNodes):
+               new_route = opt2Swap(existing_route, i, k)
+               new_distance = calculateTotalDistance(new_route)
+               if new_distance < best_distance:
+                   existing_route = new_route
+                   goto start_again # TODO
 
-
-
+# Fisher-Yates shuffle
+def shuffle(list):
+    n = len(list)
+    for i in range(n):
+        j = randint(i, n - 1) # i <= j < n
+        list[i], list[j] = list[j], list[i] # swap elements i and j
 
 
 
@@ -55,6 +70,9 @@ def main():
         print("Usage: python travelingsalesman.py inputfilename")
     else:
         print("Start: " + str(datetime.datetime.now().time()))
+        
+        seed(None) # seed from current time
+
         inFile = sys.argv[1] # first argument
         outFile = inFile + ".tour" # ex. input.txt -> input.txt.tour
         output = ""
