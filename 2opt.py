@@ -65,6 +65,8 @@ def opt2(route, n):
                     best_distance = new_distance
         improve += 1
 
+    return best_distance
+
 
 # Fisher-Yates shuffle
 # Parameters: list, list length, start index (inclusive), end index (exclusive)
@@ -109,15 +111,15 @@ def main():
                 vertices.append(newNode) # add each city (Node) to vertices
                 count += 1
 
+        shuffle(vertices, count, 1) # randomize tour except start city
+        tourLength = opt2(vertices, count) # call main driver program
+
         vertices.append(vertices[0]) # add start city to end to make tour
 
-        print([i.ID for i in vertices])
-        shuffle(vertices, count, 1, count - 1) # randomize tour except start city
-        print([i.ID for i in vertices])
-
-        opt2(vertices, count) # call main driver program
-
+        print("Length: " + str(tourLength))
+        print("Route:  " + str(' '.join([str(i.ID) for i in vertices])))
         print("Finish: " + str(datetime.datetime.now().time()))
+
 
 if __name__ == '__main__':
     main()
