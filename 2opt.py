@@ -53,7 +53,10 @@ def opt2(route, n):
     existing_route = route
     improve = 0
 
+    improveFound = False      #extra bool variable since we do not have access to the "goto" label in python
+
     while improve < IMPROVE_LIMIT:
+        improveFound = False
         best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
             for k in range(i + 1, n):
@@ -61,11 +64,18 @@ def opt2(route, n):
                 new_distance = routeDistance(new_route, n)
                 if new_distance < best_distance: # improvement found; reset
                     improve = 0
+                    improveFound = True
                     existing_route = new_route
                     best_distance = new_distance
+                    break
+                
+            if improveFound == True:
+                break
+
+
         improve += 1
 
-    return best_distance
+    return best_distance, existing_route
 
 
 # Fisher-Yates shuffle
@@ -99,6 +109,7 @@ def main():
 
         vertices = []   #store all the nodes in a list
         count = 0       #for initialization of node's order
+        bestTour = []
 
         arr = read_data.split('\n') # split content into lines
         for i in range(len(arr)): # for each line
@@ -112,12 +123,12 @@ def main():
                 count += 1
 
         shuffle(vertices, count, 1) # randomize tour except start city
-        tourLength = opt2(vertices, count) # call main driver program
+        tourLength, bestTour = opt2(vertices, count) # call main driver program
 
-        vertices.append(vertices[0]) # add start city to end to make tour
+        bestTour.append(vertices[0]) # add start city to end to make tour
 
         print("Length: " + str(tourLength))
-        print("Route:  " + str(' '.join([str(i.ID) for i in vertices])))
+        print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
         print("Finish: " + str(datetime.datetime.now().time()))
 
 
