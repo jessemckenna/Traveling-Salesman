@@ -62,7 +62,7 @@ def opt2(route, n):
     while improveFound == True:
         improveFound = False
         #best_distance = routeDistance(existing_route, n)
-        for i in range(n - 1):
+        for i in range(1, n - 1):
             for k in range(i + 1, n):
                 new_route = opt2Swap(existing_route, i, k)
                 new_distance = routeDistance(new_route, n)
