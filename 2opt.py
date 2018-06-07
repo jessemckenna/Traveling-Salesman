@@ -8,10 +8,9 @@ from random import randint
 from math import sqrt
 from math import pow
 
-MIN_IMPROVEMENT = 20
+IMPROVE_LIMIT = 20
 
 class Node:
-
     def __init__(self, coords):
         self.ID = coords[0] #attribute to keep track of the ID
         self.x = coords[1]  #attribute to keep track of x coord
@@ -19,7 +18,6 @@ class Node:
 
 #source: https://en.wikipedia.org/wiki/2-opt      
 def opt2Swap(route, i, k):
-
     #"take route[0] to route[i-1] and add them in reverse order to new_route" 
     new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
 
@@ -41,36 +39,44 @@ def getDistance(node1, node2):
     return d
 
 
-def routeDistance(route):
-    # TODO
-    return 0
+def routeDistance(route, n):
+    d = 0 # distance
+    for i in range(1, n): # sum distances between nodes in the order given
+        d += getDistance(route[i - 1], route[i])
+    d += getDistance(route[-1], route[0]) # add distance back to start
+    return d
 
 
 # source: http://www.technical-recipes.com/2012/applying-c-implementations-of-2-opt-to-travelling-salesman-problems/
-def opt2(cities):
-    n = len(cities)
-    improvement = 0
+# Parameters: route (an array of Node objects), n (count of objects in route)
+def opt2(route, n):
+    existing_route = route
+    improve = 0
 
-    # TODO: initialize existing_route
-
-    while improvement < MIN_IMPROVEMENT:
-        best_distance = routeDistance(existing_route)
+    while improve < IMPROVE_LIMIT:
+        best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
             for k in range(i + 1, n):
                 new_route = opt2Swap(existing_route, i, k)
-                new_distance = routeDistance(new_route)
+                new_distance = routeDistance(new_route, n)
                 if new_distance < best_distance: # improvement found; reset
-                    improvement = 0
+                    improve = 0
                     existing_route = new_route
                     best_distance = new_distance
-        improvement += 1
+        improve += 1
 
 
 # Fisher-Yates shuffle
-def shuffle(list):
-    n = len(list)
-    for i in range(n):
-        j = randint(i, n - 1) # i <= j < n
+# Parameters: list, list length, start index (inclusive), end index (exclusive)
+def shuffle(list, n, start=0, end=None):
+    if end == None:
+        end = n
+
+    if start < 0 or end > n:
+        return
+
+    for i in range(start, end):
+        j = randint(i, end - 1) # i <= j < end
         list[i], list[j] = list[j], list[i] # swap elements i and j
 
 
@@ -89,31 +95,29 @@ def main():
         with open(inFile) as f: # inFile is open in this block and auto-closed after
             read_data = f.read() # get entire file content as string
 
-        
-        vertices = []        #store all the nodes in a list
-        count = 0           #for initialization of node's order
-        tempX = 0
-        tempY = 0
-        tempID = 0
+        vertices = []   #store all the nodes in a list
+        count = 0       #for initialization of node's order
 
         arr = read_data.split('\n') # split content into lines
         for i in range(len(arr)): # for each line
             if len(arr[i]) > 0:
-                count = count + 1
 
-                temp = [int(x) for x in (arr[i].strip().split(" "))] # split into identifier, x, y
-         
-                
-                n = Node(temp)  #the above could be combined into one line later, just wanted to be clear
-                vertices.append(n)
+                # split into [identifier, x, y]
+                arr[i] = [int(x) for x in (arr[i].strip().split(" "))] 
 
+                newNode = Node(arr[i])
+                vertices.append(newNode) # add each city (Node) to vertices
+                count += 1
 
+        vertices.append(vertices[0]) # add start city to end to make tour
 
-        #shuffle the nodes to randomize the path as per 2-opt procedure
-        shuffle(vertices)
-        
-        #call main driver program here
+        print([i.ID for i in vertices])
+        shuffle(vertices, count, 1, count - 1) # randomize tour except start city
+        print([i.ID for i in vertices])
 
+        opt2(vertices, count) # call main driver program
+
+        print("Finish: " + str(datetime.datetime.now().time()))
 
 if __name__ == '__main__':
     main()
