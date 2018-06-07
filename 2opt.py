@@ -1,6 +1,5 @@
-
-
-
+# Group 27: Heather Godsell, Jesse McKenna, Mario Franco-Munoz
+# CS325 Project: Traveling Salesman
 
 import sys
 import datetime
@@ -9,14 +8,14 @@ from random import randint
 from math import sqrt
 from math import pow
 
+MIN_IMPROVEMENT = 20
+
 class Node:
 
     def __init__(self, coords):
         self.ID = coords[0] #attribute to keep track of the ID
         self.x = coords[1]  #attribute to keep track of x coord
         self.y = coords[2]  #attribute to keep track of y coord
-
-
 
 #source: https://en.wikipedia.org/wiki/2-opt      
 def opt2Swap(route, i, k):
@@ -40,21 +39,32 @@ def getDistance(node1, node2):
     #round the number
     d = int(round(d))
     return d
-    
 
-def opt2():
-    improved = False
-    swappableNodes = 0
-    while !improved:
-       start_again:
-       best_distance = calculateTotalDistance(existing_route)
-       for i in range(1, swappableNodes - 1):
-           for k in range(i + 1, swappableNodes):
-               new_route = opt2Swap(existing_route, i, k)
-               new_distance = calculateTotalDistance(new_route)
-               if new_distance < best_distance:
-                   existing_route = new_route
-                   goto start_again # TODO
+
+def routeDistance(route):
+    # TODO
+    return 0
+
+
+# source: http://www.technical-recipes.com/2012/applying-c-implementations-of-2-opt-to-travelling-salesman-problems/
+def opt2(cities):
+    n = len(cities)
+    improvement = 0
+
+    # TODO: initialize existing_route
+
+    while improvement < MIN_IMPROVEMENT:
+        best_distance = routeDistance(existing_route)
+        for i in range(1, n - 1):
+            for k in range(i + 1, n):
+                new_route = opt2Swap(existing_route, i, k)
+                new_distance = routeDistance(new_route)
+                if new_distance < best_distance: # improvement found; reset
+                    improvement = 0
+                    existing_route = new_route
+                    best_distance = new_distance
+        improvement += 1
+
 
 # Fisher-Yates shuffle
 def shuffle(list):
@@ -62,7 +72,6 @@ def shuffle(list):
     for i in range(n):
         j = randint(i, n - 1) # i <= j < n
         list[i], list[j] = list[j], list[i] # swap elements i and j
-
 
 
 def main():
@@ -104,7 +113,6 @@ def main():
         shuffle(vertices)
         
         #call main driver program here
-
 
 
 if __name__ == '__main__':
