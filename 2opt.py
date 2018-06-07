@@ -5,6 +5,7 @@
 import sys
 import datetime
 from math import sqrt
+from math import pow
 from random import shuffle
 
 class Node:
@@ -17,7 +18,7 @@ class Node:
 
 
 #source: https://en.wikipedia.org/wiki/2-opt      
-def optSwap(route, i, k):
+def opt2Swap(route, i, k):
 
     #"take route[0] to route[i-1] and add them in reverse order to new_route" 
     new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
@@ -29,6 +30,23 @@ def optSwap(route, i, k):
     new_route.extend(route[k+1:])
 
     return new_route
+
+
+def getDistance(node1, node2):
+    #get the euclidean distance
+    d = sqrt(pow((node1.y - node1.x), 2) + pow((node2.y - node2.x), 2))
+
+    #round the number
+    d = int(round(d))
+    return d
+    
+
+
+def opt2():
+    print("Magic happens here")
+
+
+
 
 
 
@@ -66,13 +84,8 @@ def main():
 
         #shuffle the nodes to randomize the path as per 2-opt procedure
         shuffle(vertices)
-
-       
-
-        #test call
-        print("exiting")
-        for i in vertices:
-            print(str(i.x) + " " + str(i.y))
+        
+        #call main driver program here
 
 
 
