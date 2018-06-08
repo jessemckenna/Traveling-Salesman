@@ -3,8 +3,6 @@
 
 import sys
 import datetime
-from random import seed
-from random import randint
 from math import sqrt
 from math import pow
 
@@ -17,8 +15,9 @@ class Node:
         self.x = coords[1]  #attribute to keep track of x coord
         self.y = coords[2]  #attribute to keep track of y coord
 
+
 #source: https://en.wikipedia.org/wiki/2-opt      
-def opt2Swap(route, i, k):
+def opt2Swap(route, i, k, best_distance):
     #"take route[0] to route[i-1] and add them in reverse order to new_route" 
     new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
 
@@ -28,7 +27,18 @@ def opt2Swap(route, i, k):
     #"take route[k+1] to end and add them in order to new_route"
     new_route.extend(route[k+1:])
 
-    return new_route
+    new_distance = best_distance
+    new_distance -= getDistance(route[i], route[i - 1]) # disconnected
+    new_distance += getDistance(route[k], route[i - 1]) # new connection
+
+    if k + 1 == n: # replace connection with ending city (city 0)
+        new_distance -= getDistance(route[k], route[0])
+        new_distance += getDistance(route[i], route[0])
+    else: # replace connection with city k + 1
+        new_distance -= getDistance(route[k], route[k + 1])
+        new_distance += getDistance(route[i], route[k + 1])
+
+    return new_distance, new_route
 
 
 def getDistance(node1, node2):
@@ -61,16 +71,13 @@ def opt2(route, n, startTime):
 
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
-
     while tries < MAX_TRIES and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT:
         if improveFound == False:
             break
         improveFound = False
-        #best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
             for k in range(i + 1, n):
-                new_route = opt2Swap(existing_route, i, k)
-                new_distance = routeDistance(new_route, n)
+                new_distance, new_route = opt2Swap(existing_route, i, k, n, best_distance)
                 if new_distance < best_distance: # improvement found; reset
                     tries = 0
                     improveFound = True

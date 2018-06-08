@@ -65,8 +65,7 @@ def routeDistance(route, n):
 # Parameters: route (an array of Node objects), n (count of objects in route)
 def opt2(route, n, startTime):
     curr_route = route
-    curr_distance = routeDistance(route, n)
-    best_distance = curr_distance
+    best_distance = routeDistance(route, n)
     tries = 0
 
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
