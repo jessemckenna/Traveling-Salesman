@@ -9,7 +9,7 @@ from math import sqrt
 from math import pow
 
 MAX_TRIES = 20
-TIME_LIMIT = 2.5 * 60 # start finishing up at 2.5 minutes
+TIME_LIMIT = 120 # start finishing up after this many seconds
 
 class Node:
     def __init__(self, coords):
@@ -86,63 +86,6 @@ def opt2(route, n, startTime):
     return best_distance, existing_route
 
 
-# Fisher-Yates shuffle
-# Parameters: list, list length, start index (inclusive), end index (exclusive)
-def shuffle(list, n, start=0, end=None):
-    if end == None:
-        end = n
-
-    if start < 0 or end > n:
-        return
-
-    for i in range(start, end):
-        j = randint(i, end - 1) # i <= j < end
-        list[i], list[j] = list[j], list[i] # swap elements i and j
-
-
-# Variant on merge that sorts by distance from given source node, ascending
-def dMerge(arr1, arr2, src):
-    len1 = len(arr1)
-    len2 = len(arr2)
-
-    if len1 == 0:
-        return arr2
-
-    if len2 == 0:
-        return arr1
-
-    index1 = 0
-    index2 = 0
-    arrMerged = []
-
-    while index1 < len1 and index2 < len2:
-        # append smaller value from arrays to arrMerged
-        if getDistance(src, arr1[index1]) < getDistance(src, arr2[index2]):
-            arrMerged.append(arr1[index1])
-            index1 += 1
-        else:
-            arrMerged.append(arr2[index2])
-            index2 += 1
-
-    # append the rest of the leftover array to arrMerged
-    if index1 >= len1:
-        arrMerged += arr2[index2:len2]
-    if index2 >= len2:
-        arrMerged += arr1[index1:len1]
-
-    return arrMerged
-
-
-# Variant on mergesort that sorts by distance from given source node, ascending
-def dMergeSort(arr, src):
-    if len(arr) <= 1: # base case
-        return arr
-
-    mid = int(len(arr) / 2)
-    leftSorted = dMergeSort(arr[0:mid], src)
-    rightSorted = dMergeSort(arr[mid:len(arr)], src)
-    return dMerge(leftSorted, rightSorted, src)
-
 #get min distance from a given node
 def minDistance(arr, src):
     min = sys.maxsize
@@ -155,8 +98,6 @@ def minDistance(arr, src):
     return nearestN
 
 
-
-
 def greedyRoute(graph, n):
     cities = graph[:] # remaining cities to travel to
     route = [cities.pop(0)] # resulting route (begins with start city)
@@ -164,7 +105,6 @@ def greedyRoute(graph, n):
 
 
     while len(cities) > 0:
-        #cities = dMergeSort(cities, current) # sort from closest to farthest
         current = minDistance(cities, current)
 
         cities.remove(current)
@@ -203,26 +143,10 @@ def main():
                 vertices.append(newNode) # add each city (Node) to vertices
                 count += 1
 
-        shuffle(vertices, count, len(vertices)) # begin with a random tour
         greedy = greedyRoute(vertices, count) # begin with a greedy tour
-        if routeDistance(greedy, count) < routeDistance(vertices, count):
-            vertices = greedy[:]
-            print("Greedy starting route. Setup in " + str(datetime.datetime.now() - startTime))
-        else:
-            print("Random starting route. Setup in " + str(datetime.datetime.now() - startTime))
+        print("Set up completed in " + str(datetime.datetime.now() - startTime))
 
         tourLength, bestTour = opt2(vertices, len(vertices), startTime)
-
-
-        finishTime = datetime.datetime.now()
-        elapsedTime = finishTime - startTime
-
-        print("Finish: " + str(finishTime))
-        print("Elapsed: " + str(elapsedTime))
-
-        print("Length: " + str(tourLength))
-        print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
-
 
         with open(outFile, "w") as f:
             f.write(str(tourLength) + "\n") # write tour length to first line
