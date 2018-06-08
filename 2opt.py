@@ -9,6 +9,7 @@ from math import sqrt
 from math import pow
 
 MAX_TRIES = 20
+TIME_LIMIT = (3 * 60) - 5 # 3 minutes, minus a 5-second buffer to finish up
 
 class Node:
     def __init__(self, coords):
@@ -52,14 +53,14 @@ def routeDistance(route, n):
 
 # source: http://www.technical-recipes.com/2012/applying-c-implementations-of-2-opt-to-travelling-salesman-problems/
 # Parameters: route (an array of Node objects), n (count of objects in route)
-def opt2(route, n):
+def opt2(route, n, startTime):
     existing_route = route
     best_distance = routeDistance(route, n)
     tries = 0
 
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
-    while tries < MAX_TRIES:
+    while tries < MAX_TRIES and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT:
         improveFound = False
         #best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
@@ -177,8 +178,8 @@ def main():
         for i in range(len(arr)): # for each line
             if len(arr[i]) > 0:
 
-                # split into [identifier, x, y]
-                arr[i] = [int(x) for x in (arr[i].strip().split(" "))] 
+                arr[i] = arr[i].split() # split into [identifier, x, y]
+                arr[i] = list(map(int, arr[i])) # convert contents to int
 
                 newNode = Node(arr[i])
                 vertices.append(newNode) # add each city (Node) to vertices
@@ -187,7 +188,7 @@ def main():
         #shuffle(vertices, count, len(vertices)) # begin with a random tour
         vertices = greedyRoute(vertices, count) # begin with a greedy tour
 
-        tourLength, bestTour = opt2(vertices, len(vertices)) # call main driver program
+        tourLength, bestTour = opt2(vertices, len(vertices), startTime)
 
         finishTime = datetime.datetime.now()
         elapsedTime = finishTime - startTime
@@ -195,8 +196,8 @@ def main():
         print("Finish: " + str(finishTime))
         print("Elapsed: " + str(elapsedTime))
 
-        print("Length: " + str(tourLength))
-        print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
+        #print("Length: " + str(tourLength))
+        #print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
 
         with open(outFile, "w") as f:
             f.write(str(tourLength) + "\n") # write tour length to first line
