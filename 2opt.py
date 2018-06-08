@@ -189,9 +189,6 @@ def main():
 
         tourLength, bestTour = opt2(vertices, len(vertices)) # call main driver program
 
-        bestTour.append(vertices[0]) # add start city to end to complete tour
-        count += 1
-
         finishTime = datetime.datetime.now()
         elapsedTime = finishTime - startTime
 
@@ -204,9 +201,7 @@ def main():
         with open(outFile, "w") as f:
             f.write(str(tourLength) + "\n") # write tour length to first line
             for i in range(count):
-                f.write(str(bestTour[i].ID) + " " 
-                        + str(bestTour[i].x) + " "
-                        + str(bestTour[i].y) + "\n")
+                f.write(str(bestTour[i].ID) + "\n")
 
 
 if __name__ == '__main__':
