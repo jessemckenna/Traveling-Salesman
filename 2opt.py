@@ -58,7 +58,8 @@ def opt2(route, n, startTime):
 
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
-    while tries < MAX_TRIES: #and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT:
+
+    while tries < MAX_TRIES: #and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT
         improveFound = False
         #best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
@@ -137,15 +138,28 @@ def dMergeSort(arr, src):
     rightSorted = dMergeSort(arr[mid:len(arr)], src)
     return dMerge(leftSorted, rightSorted, src)
 
+#get min distance from a given node
+def minDistance(arr, src):
+    min = sys.maxsize
+    for i in arr:
+        if getDistance(src, i) < min and i != src:
+            nearestN = i
+
+    return nearestN
+
+
+
 
 def greedyRoute(graph, n):
     cities = graph[:] # remaining cities to travel to
     route = [cities.pop(0)] # resulting route (begins with start city)
     current = graph[0]
 
+
     while len(cities) > 0:
-        cities = dMergeSort(cities, current) # sort from closest to farthest
-        current = cities[0]
+        #cities = dMergeSort(cities, current) # sort from closest to farthest
+        greedyChoice = minDistance(cities, current)
+        current = greedyChoice
         route.append(cities.pop(0)) # add closest node to route
     
     return route
@@ -191,8 +205,16 @@ def main():
 
         tourLength, bestTour = opt2(vertices, len(vertices), startTime)
 
-        #print("Length: " + str(tourLength))
-        #print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
+
+        finishTime = datetime.datetime.now()
+        elapsedTime = finishTime - startTime
+
+        print("Finish: " + str(finishTime))
+        print("Elapsed: " + str(elapsedTime))
+
+        print("Length: " + str(tourLength))
+        print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
+
 
         with open(outFile, "w") as f:
             f.write(str(tourLength) + "\n") # write tour length to first line
