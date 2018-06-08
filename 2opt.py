@@ -126,8 +126,6 @@ def main():
     else:
         startTime = datetime.datetime.now()
         print("Start: " + str(startTime))
-        
-        seed(None) # seed from current time
 
         inFile = sys.argv[1] # first argument
         outFile = inFile + ".tour" # ex. input.txt -> input.txt.tour
