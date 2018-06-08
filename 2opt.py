@@ -4,7 +4,6 @@
 import sys
 import datetime
 from math import sqrt
-from math import pow
 
 MAX_TRIES = 20
 TIME_LIMIT = 175 # start finishing up after this many seconds
@@ -17,41 +16,31 @@ class Node:
 
 
 #source: https://en.wikipedia.org/wiki/2-opt      
-def opt2Swap(route, i, k, n, best_distance):
-    new_distance = best_distance
-    new_distance -= getDistance(route[i], route[i - 1]) # disconnected
-    new_distance += getDistance(route[k], route[i - 1]) # new connection
+def opt2Swap(route, i, k, n):
+    change = 0
+    change -= fastDistance(route[i], route[i - 1]) # disconnected
+    change += fastDistance(route[k], route[i - 1]) # new connection
 
     if k + 1 == n: # replace connection with ending city (city 0)
-        new_distance -= getDistance(route[k], route[0])
-        new_distance += getDistance(route[i], route[0])
+        change -= fastDistance(route[k], route[0])
+        change += fastDistance(route[i], route[0])
     else: # replace connection with city k + 1
-        new_distance -= getDistance(route[k], route[k + 1])
-        new_distance += getDistance(route[i], route[k + 1])
+        change -= fastDistance(route[k], route[k + 1])
+        change += fastDistance(route[i], route[k + 1])
 
-    if new_distance < best_distance:
-        #"take route[0] to route[i-1] and add them in reverse order to new_route" 
-        new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
+    if change < 0: # this change would reduce distance; modify route in-place
+        route[i : k + 1] = reversed(route[i : k + 1])
+        return True # improvement found
 
-        #"take route[i] to route[k] and add them in reverse order to new_route"
-        new_route.extend(reversed(route[i:k+1]))     #again, upper bounds are not inclusive in python
-
-        #"take route[k+1] to end and add them in order to new_route"
-        new_route.extend(route[k+1:])
-
-        return new_distance, new_route
-
-    else:
-        return new_distance, route
+    return False # improvement not found
 
 
-def getDistance(node1, node2):
-    #get the euclidean distance
-    d = sqrt(pow((node2.y - node1.y), 2) + pow((node2.x - node1.x), 2))
+def fastDistance(node1, node2): # distance without the sqrt, for fast comparisons
+    return (node2.y - node1.y)**2 + (node2.x - node1.x)**2
 
-    #round the number
-    d = int(round(d))
-    return d
+
+def getDistance(node1, node2): # actual euclidean distance
+    return round(sqrt((node2.y - node1.y)**2 + (node2.x - node1.x)**2))
 
 
 def routeDistance(route, n):
@@ -66,13 +55,10 @@ def routeDistance(route, n):
 # source: http://www.technical-recipes.com/2012/applying-c-implementations-of-2-opt-to-travelling-salesman-problems/
 # Parameters: route (an array of Node objects), n (count of objects in route)
 def opt2(route, n, startTime):
-    existing_route = route
-    best_distance = routeDistance(route, n)
-    tries = 0
-
     global TIME_LIMIT
     global MAX_TRIES
 
+    tries = 0
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
     while tries < MAX_TRIES and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT:
@@ -81,27 +67,24 @@ def opt2(route, n, startTime):
         improveFound = False
         for i in range(1, n - 1):
             for k in range(i + 1, n):
-                new_distance, new_route = opt2Swap(existing_route, i, k, n, best_distance)
-                if new_distance < best_distance: # improvement found; reset
+                improveFound = opt2Swap(route, i, k, n)
+                if improveFound: # route was improved; reset
                     tries = 0
-                    improveFound = True
-                    existing_route = new_route
-                    best_distance = new_distance
                     break
                 
-            if improveFound == True:
+            if improveFound:
                 break
 
         tries += 1
 
-    return best_distance, existing_route
+    return routeDistance(route, n)
 
 
 #get min distance from a given node
 def minDistance(arr, src):
     min = sys.maxsize
     for i in arr:
-        temp = getDistance(src, i)
+        temp = fastDistance(src, i)
         if temp < min and i != src:
             min = temp
             nearestN = i
@@ -109,19 +92,17 @@ def minDistance(arr, src):
     return nearestN
 
 
-def greedyRoute(graph, n):
-    cities = graph[:] # remaining cities to travel to
-    route = [cities.pop(0)] # resulting route (begins with start city)
-    current = graph[0]
+def greedyRoute(route, n):
+    cities = route[1:] # remaining cities to travel to
+    routeIdx = 1 # skip city 0
+    current = route[1]
 
-
-    while len(cities) > 0:
+    while routeIdx < n:
         current = minDistance(cities, current)
 
         cities.remove(current)
-        route.append(current) # add closest node to route
-    
-    return route
+        route[routeIdx] = current # add closest node to route
+        routeIdx += 1
 
 
 def main():
@@ -139,7 +120,6 @@ def main():
 
         vertices = []   #store all the nodes in a list
         count = 0       #for initialization of node's order
-        bestTour = []
 
         arr = read_data.split('\n') # split content into lines
         for i in range(len(arr)): # for each line
@@ -152,15 +132,15 @@ def main():
                 vertices.append(newNode) # add each city (Node) to vertices
                 count += 1
 
-        greedy = greedyRoute(vertices, count) # begin with a greedy tour
+        greedyRoute(vertices, count) # begin with a greedy tour
         print("Set up completed in " + str(datetime.datetime.now() - startTime))
 
-        tourLength, bestTour = opt2(vertices, len(vertices), startTime)
+        tourLength = opt2(vertices, len(vertices), startTime)
 
         with open(outFile, "w") as f:
             f.write(str(tourLength) + "\n") # write tour length to first line
             for i in range(count):
-                f.write(str(bestTour[i].ID) + "\n")
+                f.write(str(vertices[i].ID) + "\n")
 
         finishTime = datetime.datetime.now()
         elapsedTime = finishTime - startTime
