@@ -95,6 +95,65 @@ def shuffle(list, n, start=0, end=None):
         list[i], list[j] = list[j], list[i] # swap elements i and j
 
 
+# Variant on merge that sorts by distance from given source node, ascending
+def dMerge(arr1, arr2, src):
+    len1 = len(arr1)
+    len2 = len(arr2)
+
+    if len1 == 0:
+        return arr2
+
+    if len2 == 0:
+        return arr1
+
+    index1 = 0
+    index2 = 0
+    arrMerged = []
+
+    while index1 < len1 and index2 < len2:
+        # append smaller value from arrays to arrMerged
+        distance1 = getDistance(src, arr1[index1])
+        distance2 = getDistance(src, arr2[index2])
+        if getDistance(src, arr1[index1]) < getDistance(src, arr2[index2]):
+            arrMerged.append(arr1[index1])
+            index1 += 1
+        else:
+            arrMerged.append(arr2[index2])
+            index2 += 1
+
+    # append the rest of the leftover array to arrMerged
+    if index1 >= len1:
+        arrMerged += arr2[index2:len2]
+    if index2 >= len2:
+        arrMerged += arr1[index1:len1]
+
+    return arrMerged
+
+
+# Variant on mergesort that sorts by distance from given source node, ascending
+def dMergeSort(arr, src):
+    if len(arr) <= 1: # base case
+        return arr
+
+    mid = int(len(arr) / 2)
+    leftSorted = dMergeSort(arr[0:mid], src)
+    rightSorted = dMergeSort(arr[mid:len(arr)], src)
+    return dMerge(leftSorted, rightSorted, src)
+
+
+def greedyRoute(graph, n):
+    cities = graph[:] # remaining cities to travel to
+    route = [cities.pop(0)] # resulting route (begins with start city)
+    current = graph[0]
+
+    while len(cities) > 0:
+        cities = dMergeSort(cities, current) # sort from closest to farthest
+        current = cities[0]
+        route.append(cities.pop(0)) # add closest node to route
+    
+    return route
+
+
 def main():
     if len(sys.argv) != 2:
         print("Usage: python travelingsalesman.py inputfilename")
@@ -125,7 +184,9 @@ def main():
                 vertices.append(newNode) # add each city (Node) to vertices
                 count += 1
 
-        shuffle(vertices, count, len(vertices)) # randomize tour except start city
+        #shuffle(vertices, count, len(vertices)) # begin with a random tour
+        vertices = greedyRoute(vertices, count) # begin with a greedy tour
+
         tourLength, bestTour = opt2(vertices, len(vertices)) # call main driver program
 
         bestTour.append(vertices[0]) # add start city to end to complete tour
@@ -146,6 +207,7 @@ def main():
                 f.write(str(bestTour[i].ID) + " " 
                         + str(bestTour[i].x) + " "
                         + str(bestTour[i].y) + "\n")
+
 
 if __name__ == '__main__':
     main()
