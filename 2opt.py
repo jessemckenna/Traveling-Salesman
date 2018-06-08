@@ -17,7 +17,7 @@ class Node:
 
 
 #source: https://en.wikipedia.org/wiki/2-opt      
-def opt2Swap(route, i, k, best_distance):
+def opt2Swap(route, i, k, n, best_distance):
     #"take route[0] to route[i-1] and add them in reverse order to new_route" 
     new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
 
