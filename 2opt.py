@@ -7,7 +7,7 @@ from math import sqrt
 from math import pow
 
 MAX_TRIES = 20
-TIME_LIMIT = 120 # start finishing up after this many seconds
+TIME_LIMIT = 175 # start finishing up after this many seconds
 
 class Node:
     def __init__(self, coords):
@@ -18,15 +18,6 @@ class Node:
 
 #source: https://en.wikipedia.org/wiki/2-opt      
 def opt2Swap(route, i, k, n, best_distance):
-    #"take route[0] to route[i-1] and add them in reverse order to new_route" 
-    new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
-
-    #"take route[i] to route[k] and add them in reverse order to new_route"
-    new_route.extend(reversed(route[i:k+1]))     #again, upper bounds are not inclusive in python
-
-    #"take route[k+1] to end and add them in order to new_route"
-    new_route.extend(route[k+1:])
-
     new_distance = best_distance
     new_distance -= getDistance(route[i], route[i - 1]) # disconnected
     new_distance += getDistance(route[k], route[i - 1]) # new connection
@@ -38,7 +29,20 @@ def opt2Swap(route, i, k, n, best_distance):
         new_distance -= getDistance(route[k], route[k + 1])
         new_distance += getDistance(route[i], route[k + 1])
 
-    return new_distance, new_route
+    if new_distance < best_distance:
+        #"take route[0] to route[i-1] and add them in reverse order to new_route" 
+        new_route = route[:i]    #i is not inclusive, so this is the equivalent as i-1
+
+        #"take route[i] to route[k] and add them in reverse order to new_route"
+        new_route.extend(reversed(route[i:k+1]))     #again, upper bounds are not inclusive in python
+
+        #"take route[k+1] to end and add them in order to new_route"
+        new_route.extend(route[k+1:])
+
+        return new_distance, new_route
+
+    else:
+        return new_distance, route
 
 
 def getDistance(node1, node2):
