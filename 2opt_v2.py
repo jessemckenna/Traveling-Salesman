@@ -31,40 +31,30 @@ def opt2Swap(route, i, k):
     return new_route
 
 
-def getDistance(node1, node2):
-    #get the euclidean distance
-    d = sqrt(pow((node2.y - node1.y), 2) + pow((node2.x - node1.x), 2))
-
-    #round the number
-    d = int(round(d))
-    return d
-
-
-def routeDistance(route, n):
+def routeDistance(route, n, distances):
     d = 0 # distance
     for i in range(1, n): # sum distances between nodes in the order given
-        d += getDistance(route[i - 1], route[i])
-    d += getDistance(route[-1], route[0]) # add distance back to start
+        d += distances[route[i - 1].ID][route[i].ID]
+    d += distances[route[-1].ID][route[0].ID] # add distance back to start
 
     return d
 
 
 # source: http://www.technical-recipes.com/2012/applying-c-implementations-of-2-opt-to-travelling-salesman-problems/
 # Parameters: route (an array of Node objects), n (count of objects in route)
-def opt2(route, n, startTime):
+def opt2(route, n, startTime, distances):
     existing_route = route
-    best_distance = routeDistance(route, n)
+    best_distance = routeDistance(route, n, distances)
     tries = 0
 
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
     while tries < MAX_TRIES: #and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT:
         improveFound = False
-        #best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
             for k in range(i + 1, n):
                 new_route = opt2Swap(existing_route, i, k)
-                new_distance = routeDistance(new_route, n)
+                new_distance = routeDistance(new_route, n, distances)
                 if new_distance < best_distance: # improvement found; reset
                     tries = 0
                     improveFound = True
@@ -95,7 +85,7 @@ def shuffle(list, n, start=0, end=None):
 
 
 # Variant on merge that sorts by distance from given source node, ascending
-def dMerge(arr1, arr2, src):
+def dMerge(arr1, arr2, src, distances):
     len1 = len(arr1)
     len2 = len(arr2)
 
@@ -111,7 +101,7 @@ def dMerge(arr1, arr2, src):
 
     while index1 < len1 and index2 < len2:
         # append smaller value from arrays to arrMerged
-        if getDistance(src, arr1[index1]) < getDistance(src, arr2[index2]):
+        if distances[src.ID][arr1[index1].ID] < distances[src.ID][arr2[index2].ID]:
             arrMerged.append(arr1[index1])
             index1 += 1
         else:
@@ -128,27 +118,45 @@ def dMerge(arr1, arr2, src):
 
 
 # Variant on mergesort that sorts by distance from given source node, ascending
-def dMergeSort(arr, src):
+def dMergeSort(arr, src, distances):
     if len(arr) <= 1: # base case
         return arr
 
     mid = int(len(arr) / 2)
-    leftSorted = dMergeSort(arr[0:mid], src)
-    rightSorted = dMergeSort(arr[mid:len(arr)], src)
-    return dMerge(leftSorted, rightSorted, src)
+    leftSorted = dMergeSort(arr[0:mid], src, distances)
+    rightSorted = dMergeSort(arr[mid:len(arr)], src, distances)
+    return dMerge(leftSorted, rightSorted, src, distances)
 
 
-def greedyRoute(graph, n):
+def greedyRoute(graph, n, distances):
     cities = graph[:] # remaining cities to travel to
     route = [cities.pop(0)] # resulting route (begins with start city)
     current = graph[0]
 
     while len(cities) > 0:
-        cities = dMergeSort(cities, current) # sort from closest to farthest
+        cities = dMergeSort(cities, current, distances) # sort from closest to farthest
         current = cities[0]
         route.append(cities.pop(0)) # add closest node to route
     
     return route
+
+
+# Parameters: list of Nodes, count of Nodes
+def createEdgeList(nodes, n): 
+    # Create empty 2D list of size (n * n)
+    edgeList = [None] * n
+    for i in range(n):
+        edgeList[i] = [float('inf')] * n
+
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                edgeList[i][j] = float('inf')
+            else:
+                # dist = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+                edgeList[i][j] = int(sqrt((nodes[i].x - nodes[j].x)**2
+                                        + (nodes[i].y - nodes[j].y)**2))
+    return edgeList
 
 
 def main():
@@ -181,15 +189,17 @@ def main():
                 vertices.append(newNode) # add each city (Node) to vertices
                 count += 1
 
+        distances = createEdgeList(vertices, count)
+
         shuffle(vertices, count, len(vertices)) # begin with a random tour
-        greedy = greedyRoute(vertices, count) # begin with a greedy tour
-        if routeDistance(greedy, count) < routeDistance(vertices, count):
+        greedy = greedyRoute(vertices, count, distances) # begin with a greedy tour
+        if routeDistance(greedy, count, distances) < routeDistance(vertices, count, distances):
             vertices = greedy[:]
             print("Greedy starting route. Setup in " + str(datetime.datetime.now() - startTime))
         else:
             print("Random starting route. Setup in " + str(datetime.datetime.now() - startTime))
 
-        tourLength, bestTour = opt2(vertices, len(vertices), startTime)
+        tourLength, bestTour = opt2(vertices, len(vertices), startTime, distances)
 
         #print("Length: " + str(tourLength))
         #print("Route:  " + str(' '.join([str(i.ID) for i in bestTour])))
