@@ -56,10 +56,15 @@ def opt2(route, n, startTime):
     best_distance = routeDistance(route, n)
     tries = 0
 
+    global TIME_LIMIT
+    global MAX_TRIES
+
     improveFound = True      #extra bool variable since we do not have access to the "goto" label in python
 
 
-    while tries < MAX_TRIES: #and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT
+    while tries < MAX_TRIES and (datetime.datetime.now() - startTime).seconds < TIME_LIMIT:
+        if improveFound == False:
+            break
         improveFound = False
         #best_distance = routeDistance(existing_route, n)
         for i in range(1, n - 1):
