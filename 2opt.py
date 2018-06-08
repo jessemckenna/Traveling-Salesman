@@ -142,7 +142,9 @@ def dMergeSort(arr, src):
 def minDistance(arr, src):
     min = sys.maxsize
     for i in arr:
-        if getDistance(src, i) < min and i != src:
+        temp = getDistance(src, i)
+        if temp < min and i != src:
+            min = temp
             nearestN = i
 
     return nearestN
@@ -158,9 +160,10 @@ def greedyRoute(graph, n):
 
     while len(cities) > 0:
         #cities = dMergeSort(cities, current) # sort from closest to farthest
-        greedyChoice = minDistance(cities, current)
-        current = greedyChoice
-        route.append(cities.pop(0)) # add closest node to route
+        current = minDistance(cities, current)
+
+        cities.remove(current)
+        route.append(current) # add closest node to route
     
     return route
 
