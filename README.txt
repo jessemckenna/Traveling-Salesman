@@ -1,6 +1,6 @@
 Run:
 	To run traveling salesman, execute the following console command:
-	python3 2opt_v2.py inputfilename
+	python3 2opt.py inputfilename
 
 Prerequisite:
 	A problem instance must be given as a text file with the following format:
