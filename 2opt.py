@@ -6,7 +6,7 @@ import datetime
 from math import sqrt
 
 MAX_TRIES = 20
-TIME_LIMIT = 175 # start finishing up after this many seconds
+TIME_LIMIT = 1800 # start finishing up after this many seconds
 
 class Node:
     def __init__(self, coords):
